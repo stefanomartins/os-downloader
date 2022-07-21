@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-import requests
 import argparse
 import os
+import requests
 
 OPENSUBTITLES_API_ADDRESS = "https://api.opensubtitles.com"
 if "OPENSUBTITLES_API_KEY" in os.environ:
     OPENSUBTITLES_API_KEY = os.getenv("OPENSUBTITLES_API_KEY")
 else:
     HOMEDIR =  os.path.join(os.getenv("HOME"), ".os-downloader")
-    f = open(HOMEDIR, "r")
+    f = open(HOMEDIR, "r", encoding="utf-8")
     OPENSUBTITLES_API_KEY = f.read().rstrip("\n")
-    
+
 parser = argparse.ArgumentParser("OpenSubtitles Downloader")
 parser.add_argument("filename", help="The file which you wanna download subtitles")
 parser.add_argument("--language", default="pt-BR", help="Language")

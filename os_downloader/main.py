@@ -58,7 +58,7 @@ def search_for_subtitles(languages:str, query:str, type:str, season_number:int =
     return file_ids
 
 
-def get_download_link(file_id: int) -> list:
+def get_download_link(file_id: int) -> tuple:
     headers = {
         "Content-Type": "application/json",
         "Api-Key": OPENSUBTITLES_API_KEY
@@ -69,7 +69,7 @@ def get_download_link(file_id: int) -> list:
     res = requests.post(f"{OPENSUBTITLES_API_ADDRESS}/api/v1/download", headers=headers, params=data)
     res.raise_for_status()    
     json_data = res.json()
-    return json_data["link"]
+    return (json_data["file_name"], json_data["link"])
 
 
 def download_subtitle(download_link: str):
@@ -94,7 +94,8 @@ def main():
         file_ids = search_for_subtitles(languages=arguments.language, query=video_data["title"], type="all")
 
     for i in file_ids:
-        download_link = get_download_link(file_id=i)
+        (file_name, download_link) = get_download_link(file_id=i)
+        print(f"Downloading file {file_name}")
         download_subtitle(download_link=download_link)
 
 if __name__ == '__main__':

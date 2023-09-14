@@ -2,6 +2,7 @@
 import argparse
 import os
 import requests
+import pkg_resources
 
 OPENSUBTITLES_API_ADDRESS = "https://api.opensubtitles.com"
 if "OPENSUBTITLES_API_KEY" in os.environ:
@@ -14,14 +15,15 @@ else:
 parser = argparse.ArgumentParser("OpenSubtitles Downloader")
 parser.add_argument("filename", help="The file which you wanna download subtitles")
 parser.add_argument("--language", default="pt-BR", help="Language")
-parser.add_argument("--version", action="version", version='%(prog)s v0.0.1')
+parser.add_argument("--version", action="version", version=f"%(prog)s v{pkg_resources.require('os-downloader')[0].version}")
 arguments = parser.parse_args()
 
 
 def guess_by_filename(filename: str):
     headers = {
         "Content-Type": "application/json",
-        "Api-Key": OPENSUBTITLES_API_KEY
+        "Api-Key": OPENSUBTITLES_API_KEY,
+        'User-Agent': f"os-downloader v{pkg_resources.require('os-downloader')[0].version}"
     }
     params = {
         "filename": filename
@@ -35,7 +37,8 @@ def guess_by_filename(filename: str):
 def search_for_subtitles(languages:str, query:str, type:str, season_number:int = None, episode_number:int = None) -> list:
     headers = {
         "Content-Type": "application/json", 
-        "Api-Key": OPENSUBTITLES_API_KEY
+        "Api-Key": OPENSUBTITLES_API_KEY,
+        'User-Agent': f"os-downloader v{pkg_resources.require('os-downloader')[0].version}"
     }
     params = {
         "query": query,
@@ -61,7 +64,8 @@ def search_for_subtitles(languages:str, query:str, type:str, season_number:int =
 def get_download_link(file_id: int) -> tuple:
     headers = {
         "Content-Type": "application/json",
-        "Api-Key": OPENSUBTITLES_API_KEY
+        "Api-Key": OPENSUBTITLES_API_KEY,
+        'User-Agent': f"os-downloader v{pkg_resources.require('os-downloader')[0].version}"
     }
     data = {
         "file_id": file_id

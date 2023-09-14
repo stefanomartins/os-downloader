@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='os-downloader',
-    version='v0.0.1',
+    version='v1.0.0,
     url='https://github.com/stefanomartins/os-downloader',
     license='MIT License',
     author='Stefano Martins',

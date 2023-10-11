@@ -2,20 +2,20 @@
 import argparse
 import os
 import requests
-import pkg_resources
+from __init__ import __version__
 
 OPENSUBTITLES_API_ADDRESS = "https://api.opensubtitles.com"
 if "OPENSUBTITLES_API_KEY" in os.environ:
     OPENSUBTITLES_API_KEY = os.getenv("OPENSUBTITLES_API_KEY")
 else:
-    HOMEDIR =  os.path.join(os.getenv("HOME"), ".os-downloader")
+    HOMEDIR = os.path.join(os.getenv("HOME"), ".os-downloader")
     f = open(HOMEDIR, "r", encoding="utf-8")
     OPENSUBTITLES_API_KEY = f.read().rstrip("\n")
 
 parser = argparse.ArgumentParser("OpenSubtitles Downloader")
 parser.add_argument("filename", help="The file which you wanna download subtitles")
 parser.add_argument("--language", default="pt-BR", help="Language")
-parser.add_argument("--version", action="version", version=f"%(prog)s v{pkg_resources.require('os-downloader')[0].version}")
+parser.add_argument("--version", help="Print version")
 arguments = parser.parse_args()
 
 
@@ -23,34 +23,43 @@ def guess_by_filename(filename: str):
     headers = {
         "Content-Type": "application/json",
         "Api-Key": OPENSUBTITLES_API_KEY,
-        'User-Agent': f"os-downloader v{pkg_resources.require('os-downloader')[0].version}"
+        "User-Agent": f"os-downloader {__version__}",
     }
-    params = {
-        "filename": filename
-    }
-    res = requests.get(f"{OPENSUBTITLES_API_ADDRESS}/api/v1/utilities/guessit", headers=headers, params=params)
+    params = {"filename": filename}
+    res = requests.get(
+        f"{OPENSUBTITLES_API_ADDRESS}/api/v1/utilities/guessit",
+        headers=headers,
+        params=params,
+    )
     res.raise_for_status()
     video_data = res.json()
     return video_data
 
 
-def search_for_subtitles(languages:str, query:str, type:str, season_number:int = None, episode_number:int = None) -> list:
+def search_for_subtitles(
+    languages: str,
+    query: str,
+    type: str,
+    season_number: int = None,
+    episode_number: int = None,
+) -> list:
     headers = {
-        "Content-Type": "application/json", 
+        "Content-Type": "application/json",
         "Api-Key": OPENSUBTITLES_API_KEY,
-        'User-Agent': f"os-downloader v{pkg_resources.require('os-downloader')[0].version}"
+        "User-Agent": f"os-downloader {__version__}",
     }
-    params = {
-        "query": query,
-        "languages": languages,
-        "type": type
-    }
+    params = {"query": query, "languages": languages, "type": type}
 
-    for k, v in {"season_number": season_number, "episode_number": episode_number}.items():
+    for k, v in {
+        "season_number": season_number,
+        "episode_number": episode_number,
+    }.items():
         if v is not None:
             params[k] = v
 
-    res = requests.get(f"{OPENSUBTITLES_API_ADDRESS}/api/v1/subtitles", headers=headers, params=params)
+    res = requests.get(
+        f"{OPENSUBTITLES_API_ADDRESS}/api/v1/subtitles", headers=headers, params=params
+    )
     res.raise_for_status()
     json_data = res.json()
     file_ids = []
@@ -65,13 +74,13 @@ def get_download_link(file_id: int) -> tuple:
     headers = {
         "Content-Type": "application/json",
         "Api-Key": OPENSUBTITLES_API_KEY,
-        'User-Agent': f"os-downloader v{pkg_resources.require('os-downloader')[0].version}"
+        "User-Agent": f"os-downloader {__version__}",
     }
-    data = {
-        "file_id": file_id
-    }
-    res = requests.post(f"{OPENSUBTITLES_API_ADDRESS}/api/v1/download", headers=headers, params=data)
-    res.raise_for_status()    
+    data = {"file_id": file_id}
+    res = requests.post(
+        f"{OPENSUBTITLES_API_ADDRESS}/api/v1/download", headers=headers, params=data
+    )
+    res.raise_for_status()
     json_data = res.json()
     return (json_data["file_name"], json_data["link"])
 
@@ -93,14 +102,23 @@ def main():
     video_data = guess_by_filename(arguments.filename)
 
     if video_data["type"] == "episode":
-        file_ids = search_for_subtitles(languages=arguments.language, query=video_data["title"], type=video_data["type"], season_number=video_data["season"], episode_number=video_data["episode"])
+        file_ids = search_for_subtitles(
+            languages=arguments.language,
+            query=video_data["title"],
+            type=video_data["type"],
+            season_number=video_data["season"],
+            episode_number=video_data["episode"],
+        )
     else:
-        file_ids = search_for_subtitles(languages=arguments.language, query=video_data["title"], type="all")
+        file_ids = search_for_subtitles(
+            languages=arguments.language, query=video_data["title"], type="all"
+        )
 
     for i in file_ids:
         (file_name, download_link) = get_download_link(file_id=i)
         print(f"Downloading file {file_name}")
         download_subtitle(download_link=download_link)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

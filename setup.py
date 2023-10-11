@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='os-downloader',
-    version='v1.0.0,
+    version='v1.1.0',
     url='https://github.com/stefanomartins/os-downloader',
     license='MIT License',
     author='Stefano Martins',
@@ -16,11 +16,13 @@ setup(
     packages=find_packages(),
     install_requires=[
         'requests',
-        'argparse'
+        'argparse',
+        'asyncio',
+        'httpx',
     ],
     entry_points={
         'console_scripts': [
-            'os-downloader = os_downloader.main:main'
+            'os-downloader = os_downloader.main_async:main'
         ]
     }
 )
